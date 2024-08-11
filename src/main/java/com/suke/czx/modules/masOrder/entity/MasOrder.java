@@ -7,14 +7,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.zhjg.common.autofull.annotation.AutoFullBeanSQL;
-import com.suke.zhjg.common.autofull.annotation.AutoFullData;
 import com.suke.zhjg.common.autofull.annotation.AutoFullFieldSQL;
-import com.suke.zhjg.common.autofull.annotation.AutoFullListSQL;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -40,7 +37,7 @@ public class MasOrder implements Serializable {
 
     @ApiModelProperty(value = "商品ID")
     @JsonProperty(value = "itemId")
-    public Long itemId;
+    public String itemId;
 
     @ApiModelProperty(value = "状态")
     @JsonProperty(value = "stauts")
@@ -67,7 +64,7 @@ public class MasOrder implements Serializable {
 
     @TableField(exist = false)
     @ApiModelProperty(value = "优惠券名")
-    @AutoFullFieldSQL(sql = "select name as itemName from mas_item where id = {itemId}")
+    @AutoFullFieldSQL(sql = "select name as itemName from mas_item where uuid = {itemId}")
     public String itemName;
 
     @TableField(exist = false)
@@ -79,6 +76,5 @@ public class MasOrder implements Serializable {
     @ApiModelProperty(value = "优惠券")
     @AutoFullBeanSQL(sql = "select * from mas_item where id = {itemId}")
     public MasItem item;
-
 
 }

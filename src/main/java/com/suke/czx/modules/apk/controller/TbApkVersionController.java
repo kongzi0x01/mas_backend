@@ -27,7 +27,7 @@ import java.util.Map;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/apk/version")
-@Api(value = "TbApkVersionController", tags = "APK版本管理")
+//@Api(value = "TbApkVersionController", tags = "APK版本管理")?
 public class TbApkVersionController extends AbstractController {
     private final TbApkVersionService tbApkVersionService;
 

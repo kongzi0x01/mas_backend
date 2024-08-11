@@ -3,6 +3,7 @@ package com.suke.czx.modules.masItem.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,10 +26,10 @@ import java.math.BigDecimal;
 public class MasItem implements Serializable {
     public static final long serialVersionUID = 1L;
 
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_UUID)
     @ApiModelProperty(value = "")
-    @JsonProperty(value = "id")
-    public Long id;
+    @JsonProperty(value = "uuid")
+    public String uuid;
 
     @ApiModelProperty(value = "名称")
     @JsonProperty(value = "name")
@@ -52,12 +53,11 @@ public class MasItem implements Serializable {
 
     @ApiModelProperty(value = "库存")
     @JsonProperty(value = "remain")
-    public BigDecimal remain;
+    public Integer remain;
 
-    @ApiModelProperty(value = "有效期")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @JsonProperty(value = "expireAt")
-    public Date expireAt;
+    @ApiModelProperty(value = "有效期, 单位：天")
+    @JsonProperty(value = "validDays")
+    public Integer validDays;
 
     @ApiModelProperty(value = "上架")
     @JsonProperty(value = "onSale")
@@ -67,5 +67,11 @@ public class MasItem implements Serializable {
     @JsonProperty(value = "sortIndex")
     public Long sortIndex;
 
+    @ApiModelProperty(value = "类型：1, 零担; 2整车")
+    @JsonProperty(value = "type")
+    public Integer type;
 
+    @ApiModelProperty(value = "已售量")
+    @JsonProperty(value = "soldCount")
+    public Integer soldCount;
 }

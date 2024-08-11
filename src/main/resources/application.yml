@@ -24,10 +24,10 @@ spring:
 
 swagger:
   enable: true
-  title: X-SpringBoot API
+  title: 德坤抖音后台 API
   description: API 描述
   version: 5.0.0
-  author: czx
+  author: ywj
 
 # autofull 配置
 autofull:
