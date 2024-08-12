@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.suke.czx.modules.masUser.mapper.MasUserMapper">
+
+    <select id="findByOpenId" resultType="com.suke.czx.modules.masUser.entity.MasUser">
+        SELECT *
+        FROM
+        mas_user
+        where openid = #{openid} limit 1
+    </select>
+
+    <select id="findByPhone" resultType="com.suke.czx.modules.masUser.entity.MasUser">
+        SELECT *
+        FROM
+        mas_user
+        where phone = #{phone} limit 1
+    </select>
+</mapper>

@@ -6,6 +6,8 @@ import com.suke.czx.modules.masOrder.mapper.MasOrderMapper;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
 
+import java.util.List;
+
 
 /**
  * 订单
@@ -16,5 +18,9 @@ import com.suke.czx.modules.masOrder.service.MasOrderService;
  */
 @Service
 public class MasOrderServiceImpl extends ServiceImpl<MasOrderMapper, MasOrder> implements MasOrderService {
-	
+
+    @Override
+    public List<MasOrder> findByUserIdAndItemIdAndStatus(Long userId, String itemId, Integer status) {
+        return baseMapper.findByUserIdAndItemIdAndStatus(userId, itemId, status);
+    }
 }

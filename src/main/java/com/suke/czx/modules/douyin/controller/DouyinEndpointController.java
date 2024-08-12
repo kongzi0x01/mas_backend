@@ -17,13 +17,15 @@ import com.suke.zhjg.common.autofull.util.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.*;
 
 /**
  * @author admin
@@ -63,20 +65,47 @@ public class DouyinEndpointController {
     @ApiOperation(value = "登录")
     @PostMapping("/login")
     @AuthIgnore
-    public R login(@RequestParam(defaultValue = "") String anonymous_code, @RequestParam String code) {
+    public R login(@RequestParam(defaultValue = "") String anonymous_code, @RequestParam String code,  @RequestParam(required = false) String smsUuid,  @RequestParam(required = false) String smsCode) {
+
+        String phone = douyinLoginService.getPhoneByUuid(smsUuid);
+        if(phone == null){
+            return R.error(1008,"验证码已过期").setData("验证码已过期");
+        }
+        String result = douyinLoginService.checkSmsCode(phone, smsCode);
+        if(!"success".equals(result)){
+            return R.error(1003,result).setData(result);
+        }
 
         Map<String, String> map= new HashMap<>();
         map.put("appid", appid);
         map.put("secret", secret);
         map.put("code", code);
         map.put("anonymous_code", anonymous_code);
-        Map result = douyinLoginService.login(map);
-        Integer errno = (Integer) result.get("err_no");
+        Map loginResult = douyinLoginService.login(map, phone);
+        Integer errno = (Integer) loginResult.get("err_no");
         if(errno == 0){
-            return R.ok().setData(result);
+            return R.ok();
         }else {
-            return R.error(errno,"login failed").setData(result);
+            return R.error(errno,"login failed").setData(loginResult);
         }
+    }
+
+    @ApiOperation(value = "登录")
+    @PostMapping("/save_user")
+    @AuthIgnore
+    public R save_user(@RequestParam String openId, @RequestParam(defaultValue = "") String phone, @RequestParam(defaultValue = "") String username) {
+
+        MasUser dbuser = masUserService.findUserByOpenId(openId);
+        if(ObjectUtil.isNull(dbuser)) {
+            dbuser = new MasUser();
+            dbuser.setOpenid(openId);
+            dbuser.setCreateTime(new Date());
+        }
+        dbuser.setUsername(username);
+        dbuser.setPhone(phone);
+        dbuser.setUpdateTime(new Date());
+        masUserService.saveOrUpdate(dbuser);
+        return R.ok();
     }
 
     @ApiOperation(value = "代金券列表")
@@ -110,23 +139,26 @@ public class DouyinEndpointController {
     @PostMapping("/pre_purchase")
     @AuthIgnore
     public R pre_purchase(@RequestParam String openId, @RequestParam String uuid) {
-        MasItem result = masItemService.getById(uuid);
-        if (ObjectUtil.isNull(result)) {
+        MasItem item = masItemService.getById(uuid);
+        if (ObjectUtil.isNull(item)) {
             return R.error(1001,"代金券不存在").setData("代金券不存在");
         }
-        if(result.getRemain() == 0){
+        if(item.getRemain() == 0){
             return R.error(1002,"代金券已抢光").setData("代金券已抢光");
         }
-        if(!result.getOnSale()){
+        if(!item.getOnSale()){
             return R.error(1003,"代金券已下架").setData("代金券已下架");
         }
 
-        MasUser user = douyinLoginService.findUserByOpenId(openId);
+        MasUser user = masUserService.findUserByOpenId(openId);
         if(user == null){
             return R.error(1004,"用户不存在").setData("用户不存在");
         }
+        if(Strings.isBlank(user.getPhone())){
+            return R.error(1005, "请先绑定手机号").setData("请先绑定手机号");
+        }
 
-        return R.ok();
+        return douyinLoginService.pre_purchase(user, item);
     }
 
     @ApiOperation(value = "下单")
@@ -141,7 +173,7 @@ public class DouyinEndpointController {
     @PostMapping("/my_items")
     @AuthIgnore
     public R my_items(@RequestParam String openId) {
-        MasUser user = douyinLoginService.findUserByOpenId(openId);
+        MasUser user = masUserService.findUserByOpenId(openId);
         if(user == null){
             return R.error(1004,"用户不存在").setData("用户不存在");
         }
@@ -160,14 +192,11 @@ public class DouyinEndpointController {
         if (ObjectUtil.isNull(order)) {
             return R.error(1005,"代金券不存在").setData("代金券不存在");
         }
-        if(order.getStauts() !=  0){
-            return R.error(1006,"代金券无效").setData("代金券无效");
-        }
         MasUser user = masUserService.getById(order.getUserId());
         if(!user.getOpenid().equals(openId)){
             return R.error(1007,"代金券不属于该用户").setData("代金券不属于该用户");
         }
-        order.setStauts(1);
+        order.setStatus(4);
         masOrderService.updateById(order);
         return R.ok();
     }
@@ -193,4 +222,46 @@ public class DouyinEndpointController {
     public R getGuideline() {
         MasParam param = masParamService.getById("1");
         return R.ok().setData(param.getValue());
-    }}
+    }
+
+    @ApiOperation(value = "支付回调")
+    @PostMapping("/callback")
+    @AuthIgnore
+    public Map<String, Object> callback(@RequestBody(required = false) Map<String, Object> params) {
+        log.info("params:{}", params);
+        Map<String, Object> result = new HashMap<>();
+        result.put("err_no", 0);
+        result.put("err_tips", "success");
+        return result;
+    }
+
+    @ApiOperation(value = "解密手机号数据")
+    @PostMapping("/decryptPhoneData")
+    @AuthIgnore
+    public R decryptPhoneData(@RequestParam String encryptedData, @RequestParam String iv, @RequestParam String sessionKey) {
+        Base64.Decoder decoder = Base64.getDecoder();
+        byte[] sessionKeyBytes = decoder.decode(sessionKey);
+        byte[] ivBytes = decoder.decode(iv);
+        byte[] encryptedBytes = decoder.decode(encryptedData);
+
+        String phone;
+        try{
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec skeySpec = new SecretKeySpec(sessionKeyBytes, "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+            byte[] ret = cipher.doFinal(encryptedBytes);
+            phone = new String(ret);
+        }catch (Exception e){
+            return R.error().setData("解密失败");
+        }
+        return R.ok().setData(phone);
+    }
+
+    @ApiOperation(value = "获取手机验证码")
+    @PostMapping("/fetchSmsCode")
+    @AuthIgnore
+    public R fetchSmsCode(@RequestParam String phone) {
+        return douyinLoginService.fetchSmsCode(phone);
+    }
+}

@@ -11,5 +11,7 @@ import com.suke.czx.modules.masUser.entity.MasUser;
  * @date 2024-07-07 16:13:06
  */
 public interface MasUserMapper extends BaseMapper<MasUser> {
-	
+	MasUser findByOpenId(String openid);
+
+	MasUser findByPhone(String phone);
 }

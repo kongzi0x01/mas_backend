@@ -16,5 +16,16 @@ import com.suke.czx.modules.masUser.service.MasUserService;
  */
 @Service
 public class MasUserServiceImpl extends ServiceImpl<MasUserMapper, MasUser> implements MasUserService {
-	
+
+    @Override
+    public MasUser findUserByOpenId(String openid) {
+        //根据openid查询用户
+        return baseMapper.findByOpenId(openid);
+    }
+
+    @Override
+    public MasUser findByPhone(String phone) {
+        //根据手机号查询用户
+        return baseMapper.findByPhone(phone);
+    }
 }

@@ -4,6 +4,8 @@ import com.suke.czx.modules.masOrder.entity.MasOrder;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 订单
  * 
@@ -12,5 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @date 2024-07-08 20:14:41
  */
 public interface MasOrderService extends IService<MasOrder> {
-
+    List<MasOrder> findByUserIdAndItemIdAndStatus(Long userId, String itemId, Integer status);
 }

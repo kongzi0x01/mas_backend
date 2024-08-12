@@ -13,4 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface MasUserService extends IService<MasUser> {
 
+    //根据openid查询用户
+    MasUser findUserByOpenId(String openid);
+
+    //根据phone查询
+    MasUser findByPhone(String phone);
 }

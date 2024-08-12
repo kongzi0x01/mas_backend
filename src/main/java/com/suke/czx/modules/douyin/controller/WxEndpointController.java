@@ -3,8 +3,11 @@ package com.suke.czx.modules.douyin.controller;
 import cn.hutool.core.util.ObjectUtil;
 import com.suke.czx.common.annotation.AuthIgnore;
 import com.suke.czx.common.annotation.SysLog;
+import com.suke.czx.modules.douyin.service.WxEndpointService;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
+import com.suke.czx.modules.masUser.entity.MasUser;
+import com.suke.czx.modules.masUser.service.MasUserService;
 import com.suke.zhjg.common.autofull.util.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +28,13 @@ public class WxEndpointController {
 
     @Autowired
     private MasItemService masItemService;
+
+    @Autowired
+    private MasUserService masUserService;
+
+    @Autowired
+    private WxEndpointService wxEndpointService;
+
     /**
      * 上架/更新
      */
@@ -53,5 +63,31 @@ public class WxEndpointController {
             item.setOnSale(false);
         }
         return R.ok();
+    }
+
+    /**
+     * 核销代金券
+     */
+    @ApiOperation(value = "核销代金券")
+    @SysLog("核销代金券")
+    @PostMapping("/item_checkout")
+    @AuthIgnore
+    public R item_checkout(@RequestParam String uuid, @RequestParam String phone) {
+        MasItem item = masItemService.getById(uuid);
+        if (ObjectUtil.isNull(item)) {
+            return R.error(1001,"代金券不存在").setData("代金券不存在");
+        }
+
+        MasUser user = masUserService.findByPhone(phone);
+        if (ObjectUtil.isNull(user)) {
+            return R.error(1004,"用户不存在").setData("用户不存在");
+        }
+
+        Integer result = wxEndpointService.item_checkout(user, item);
+        if (result == 0) {
+            return R.ok().setData("代金券核销成功");
+        }else{
+            return R.error(result,"无可核销代金券").setData("无可核销代金券");
+        }
     }
 }
