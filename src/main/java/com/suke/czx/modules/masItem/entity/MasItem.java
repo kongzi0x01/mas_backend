@@ -74,4 +74,8 @@ public class MasItem implements Serializable {
     @ApiModelProperty(value = "已售量")
     @JsonProperty(value = "soldCount")
     public Integer soldCount;
+
+    @ApiModelProperty(value = "用户使用手册")
+    @JsonProperty(value = "usageManual")
+    public String usageManual;
 }

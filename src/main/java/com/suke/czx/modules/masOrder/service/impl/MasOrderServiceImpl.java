@@ -18,9 +18,8 @@ import java.util.List;
  */
 @Service
 public class MasOrderServiceImpl extends ServiceImpl<MasOrderMapper, MasOrder> implements MasOrderService {
-
     @Override
-    public List<MasOrder> findByUserIdAndItemIdAndStatus(Long userId, String itemId, Integer status) {
-        return baseMapper.findByUserIdAndItemIdAndStatus(userId, itemId, status);
+    public MasOrder getByOrderNo(String orderNo) {
+        return baseMapper.getByOrderNo(orderNo);
     }
 }

@@ -2,16 +2,18 @@ package com.suke.czx.modules.douyin.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.suke.czx.common.annotation.AuthIgnore;
-import com.suke.czx.common.annotation.SysLog;
 import com.suke.czx.modules.douyin.service.WxEndpointService;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
+import com.suke.czx.modules.masOrder.entity.MasOrder;
+import com.suke.czx.modules.masOrder.service.MasOrderService;
 import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.czx.modules.masUser.service.MasUserService;
 import com.suke.zhjg.common.autofull.util.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,34 +35,46 @@ public class WxEndpointController {
     private MasUserService masUserService;
 
     @Autowired
+    private MasOrderService masOrderService;
+
+    @Autowired
     private WxEndpointService wxEndpointService;
 
     /**
      * 上架/更新
      */
     @ApiOperation(value = "上架/更新")
-    @SysLog("上架/更新")
     @PostMapping("/item_save")
     @AuthIgnore
     public R item_save(@RequestBody MasItem masItem) {
         masItem.setOnSale(true);
-        masItemService.save(masItem);
-        return R.ok();
+        if (!Strings.isBlank(masItem.getUuid())) {
+            MasItem item = masItemService.getById(masItem.getUuid());
+            if (item != null) {
+                masItemService.updateById(masItem);
+                return R.ok("优惠券更新成功");
+            } else {
+                masItemService.save(masItem);
+                return R.ok("优惠券上架成功");
+            }
+        } else {
+            return R.error("优惠券UUID不能为空").setData("优惠券UUID不能为空");
+        }
     }
 
     /**
      * 下架
      */
-    @ApiOperation(value = "上架/更新")
-    @SysLog("上架/更新")
+    @ApiOperation(value = "下架/更新")
     @PostMapping("/item_remove")
     @AuthIgnore
     public R item_remove(@RequestParam String uuid) {
         MasItem item = masItemService.getById(uuid);
         if (ObjectUtil.isNull(item)) {
-            return R.error(1001,"代金券不存在").setData("代金券不存在");
-        }else{
+            return R.error(1001, "代金券不存在").setData("代金券不存在");
+        } else {
             item.setOnSale(false);
+            masItemService.updateById(item);
         }
         return R.ok();
     }
@@ -69,25 +83,19 @@ public class WxEndpointController {
      * 核销代金券
      */
     @ApiOperation(value = "核销代金券")
-    @SysLog("核销代金券")
     @PostMapping("/item_checkout")
     @AuthIgnore
-    public R item_checkout(@RequestParam String uuid, @RequestParam String phone) {
-        MasItem item = masItemService.getById(uuid);
-        if (ObjectUtil.isNull(item)) {
-            return R.error(1001,"代金券不存在").setData("代金券不存在");
+    public R item_checkout(@RequestParam String orderNo) {
+        MasOrder order = masOrderService.getByOrderNo(orderNo);
+        if(ObjectUtil.isNull(order)){
+            return R.error(1003, "订单不存在").setData("订单不存在");
         }
 
-        MasUser user = masUserService.findByPhone(phone);
-        if (ObjectUtil.isNull(user)) {
-            return R.error(1004,"用户不存在").setData("用户不存在");
-        }
-
-        Integer result = wxEndpointService.item_checkout(user, item);
+        Integer result = wxEndpointService.item_checkout(order);
         if (result == 0) {
             return R.ok().setData("代金券核销成功");
-        }else{
-            return R.error(result,"无可核销代金券").setData("无可核销代金券");
+        } else {
+            return R.error(result, "无可核销代金券").setData("无可核销代金券");
         }
     }
 }

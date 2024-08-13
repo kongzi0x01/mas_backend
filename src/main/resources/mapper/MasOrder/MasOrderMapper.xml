@@ -2,11 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.suke.czx.modules.masOrder.mapper.MasOrderMapper">
-
-    <select id="findByUserIdAndItemIdAndStatus" resultType="List">
+    <select id="getByOrderNo" resultType="com.suke.czx.modules.masOrder.entity.MasOrder">
         SELECT *
         FROM
-        mas_user
-        where userId = #{userId} and itemId = #{itemId} and status= #{status}
+        mas_order
+        where order_no = #{orderNo} order by id desc limit 1
     </select>
 </mapper>

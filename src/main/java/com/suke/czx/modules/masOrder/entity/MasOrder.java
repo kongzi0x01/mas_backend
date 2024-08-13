@@ -35,6 +35,10 @@ public class MasOrder implements Serializable {
     @JsonProperty(value = "id")
     public Long id;
 
+    @ApiModelProperty(value = "订单号")
+    @JsonProperty(value = "orderNo")
+    public String orderNo;
+
     @ApiModelProperty(value = "商品ID")
     @JsonProperty(value = "itemId")
     public String itemId;

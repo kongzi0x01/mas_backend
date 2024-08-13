@@ -14,5 +14,5 @@ import java.util.List;
  * @date 2024-07-08 20:14:41
  */
 public interface MasOrderService extends IService<MasOrder> {
-    List<MasOrder> findByUserIdAndItemIdAndStatus(Long userId, String itemId, Integer status);
+    MasOrder getByOrderNo(String orderNo);
 }

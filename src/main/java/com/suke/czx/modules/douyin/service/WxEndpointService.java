@@ -10,7 +10,6 @@ import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
 import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.czx.modules.masUser.service.MasUserService;
-import com.suke.zhjg.common.autofull.util.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,12 +33,7 @@ public class WxEndpointService {
     @Autowired
     RestTemplate rest;
 
-    public Integer item_checkout(MasUser user, MasItem item) {
-        List<MasOrder> orders = masOrderService.findByUserIdAndItemIdAndStatus(user.getId(), item.getUuid(), 1);
-        if(orders.isEmpty()){
-            return 1005;
-        }
-        MasOrder order = orders.get(0);
+    public Integer item_checkout(MasOrder order) {
         order.setStatus(4);
         order.setUpdateTime(new Date());
         masOrderService.updateById(order);
@@ -52,7 +46,7 @@ public class WxEndpointService {
         params.put("type", "2");
         params.put("verifyCode", "111111");
         String body = getVerifyOrLoginBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",params,body);
+        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
         if(result == null){
             return "获取验证码失败";
         }
@@ -69,7 +63,7 @@ public class WxEndpointService {
         params.put("type", "1");
         params.put("verifyCode", smsCode);
         String body = getVerifyOrLoginBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",params, body);
+        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
         if(result == null){
             return "登录失败";
         }
@@ -85,7 +79,7 @@ public class WxEndpointService {
         params.put("phone", phone);
         params.put("couponId", couponId);
         String body = getCheckCouponBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon",params, body);
+        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon", body);
         if(result == null){
             return "校验失败";
         }
@@ -97,8 +91,8 @@ public class WxEndpointService {
 
     }
 
-    private Map httpPost(String url, Map<String, Object> params, String body) {
-        Map<String, String> headers = getHeaders(params);
+    private Map httpPost(String url, String body) {
+        Map<String, String> headers = getHeaders(body);
         String result = HttpRequest.post(url).addHeaders(headers).body(body).execute().body();
         log.info("login response:{}", result);
         ObjectMapper mapper = new ObjectMapper();
@@ -110,11 +104,11 @@ public class WxEndpointService {
         }
     }
 
-    private Map<String, String> getHeaders(Map<String, Object> params) {
+    private Map<String, String> getHeaders(String body) {
         String appkey = "d92fb2cc9436f22b";
         String timestamp = Long.toString(System.currentTimeMillis());
         String apipassword = "78b13253001ca367";
-        String sign = getSign(params, appkey, timestamp, apipassword);
+        String sign = getSign(appkey, timestamp,body, apipassword);
         Map<String, String> headers = new HashMap<>();
         headers.put("X-Gateway-Apikey", appkey);
         headers.put("X-Gateway-Timestamp", timestamp);
@@ -122,8 +116,8 @@ public class WxEndpointService {
         return headers;
     }
 
-    private String getSign(Map<String, Object> params, String appkey, String timestamp, String apipassword) {
-        String str = appkey + timestamp + getVerifyOrLoginBody(params)+ apipassword;
+    private String getSign(String appkey, String timestamp,String body, String apipassword) {
+        String str = appkey + timestamp + body+ apipassword;
         log.info(str);
         String sign = MD5.create().digestHex(str);
         log.info(sign);
