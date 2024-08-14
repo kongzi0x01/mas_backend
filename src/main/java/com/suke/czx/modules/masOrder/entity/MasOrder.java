@@ -51,6 +51,14 @@ public class MasOrder implements Serializable {
     @JsonProperty(value = "userId")
     public Long userId;
 
+    @ApiModelProperty(value = "抖音订单ID")
+    @JsonProperty(value = "douyinOrderId")
+    public String douyinOrderId;
+
+    @ApiModelProperty(value = "抖音订单token")
+    @JsonProperty(value = "douyinOrderToken")
+    public String douyinOrderToken;
+
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @JsonProperty(value = "createTime")
