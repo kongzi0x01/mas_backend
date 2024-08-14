@@ -47,6 +47,10 @@ public class MasOrder implements Serializable {
     @JsonProperty(value = "status")
     public Integer status;
 
+    @ApiModelProperty(value = "是否成功通知WX服: 0未通知,1已通知创建,2已通知成功/超时")
+    @JsonProperty(value = "nofityStatus")
+    public Integer nofityStatus;
+
     @ApiModelProperty(value = "用户ID")
     @JsonProperty(value = "userId")
     public Long userId;
@@ -59,6 +63,26 @@ public class MasOrder implements Serializable {
     @JsonProperty(value = "douyinOrderToken")
     public String douyinOrderToken;
 
+    @ApiModelProperty(value = "抖音callback")
+    @JsonProperty(value = "douyinCallback")
+    public String douyinCallback;
+
+    @ApiModelProperty(value = "支付流水线号")
+    @JsonProperty(value = "puchasedNo")
+    public String puchasedNo;
+
+    @ApiModelProperty(value = "支付金额（分）")
+    @JsonProperty(value = "puchasedAmount")
+    public Long puchasedAmount;
+
+    @ApiModelProperty(value = "支付成功时间")
+    @JsonProperty(value = "puchasedTime")
+    public Date puchasedTime;
+
+    @ApiModelProperty(value = "过期时间")
+    @JsonProperty(value = "expireTime")
+    public Date expireTime;
+
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @JsonProperty(value = "createTime")
@@ -68,21 +92,6 @@ public class MasOrder implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @JsonProperty(value = "updateTime")
     public Date updateTime;
-
-    @TableField(exist = false)
-    @ApiModelProperty(value = "用户名")
-    @AutoFullFieldSQL(sql = "select username as username from mas_user where id = {userId}")
-    public String username;
-
-    @TableField(exist = false)
-    @ApiModelProperty(value = "优惠券名")
-    @AutoFullFieldSQL(sql = "select name as itemName from mas_item where uuid = {itemId}")
-    public String itemName;
-
-    @TableField(exist = false)
-    @ApiModelProperty(value = "用户")
-    @AutoFullBeanSQL(sql = "select * from mas_user where id = {userId}")
-    public MasUser user;
 
     @TableField(exist = false)
     @ApiModelProperty(value = "优惠券")

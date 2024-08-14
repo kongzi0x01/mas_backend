@@ -8,4 +8,10 @@
         mas_order
         where order_no = #{orderNo} order by id desc limit 1
     </select>
+    <select id="queryByStatusAndNotifyStatus" resultType="com.suke.czx.modules.masOrder.entity.MasOrder">
+        SELECT *
+        FROM
+        mas_order
+        where status = #{status} and notify_status= #{notifyStatus}
+    </select>
 </mapper>

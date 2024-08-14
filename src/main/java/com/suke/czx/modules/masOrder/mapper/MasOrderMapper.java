@@ -14,4 +14,5 @@ import java.util.List;
  */
 public interface MasOrderMapper extends BaseMapper<MasOrder> {
 	MasOrder getByOrderNo(String orderNo);
+	List<MasOrder> queryByStatusAndNotifyStatus(Integer status, Integer notifyStatus);
 }

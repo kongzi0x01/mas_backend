@@ -15,4 +15,5 @@ import java.util.List;
  */
 public interface MasOrderService extends IService<MasOrder> {
     MasOrder getByOrderNo(String orderNo);
+    public List<MasOrder> queryByStatusAndNotifyStatus(Integer status, Integer notifyStatus);
 }

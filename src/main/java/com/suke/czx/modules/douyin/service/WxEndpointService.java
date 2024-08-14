@@ -74,6 +74,23 @@ public class WxEndpointService {
         else return message;
     }
 
+    public String loginWithoutVerify(String phone){
+        Map<String, Object> params = new HashMap<>();
+        params.put("phone", phone);
+        params.put("type", "3");
+        params.put("verifyCode", "111111");
+        String body = getVerifyOrLoginBody(params);
+        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
+        if(result == null){
+            return "登录失败";
+        }
+        Integer code = (Integer) result.get("code");
+        Boolean success = (Boolean) result.get("success");
+        String message = (String)result.get("message");
+        if(code == 200 && success) return "success";
+        else return message;
+    }
+
     public String checkCoupon(String phone, String couponId){
         Map<String, Object> params = new HashMap<>();
         params.put("phone", phone);
@@ -89,6 +106,20 @@ public class WxEndpointService {
         if(code == 200 && success) return "success";
         else return message;
 
+    }
+
+    // status:  0待支付，1已支付，2超时
+    public String buyCoupon(String phone, String couponId, String orderId, Integer status){
+        String body = getBuyCouponBody(phone, couponId, orderId, status);
+        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/buyCoupon", body);
+        if(result == null){
+            return "校验失败";
+        }
+        Integer code = (Integer) result.get("code");
+        Boolean success = (Boolean) result.get("success");
+        String message = (String)result.get("message");
+        if(code == 200 && success) return "success";
+        else return message;
     }
 
     private Map httpPost(String url, String body) {
@@ -129,6 +160,10 @@ public class WxEndpointService {
 
     private String getCheckCouponBody(Map<String, Object> params){
         return "{\"couponId\":\""+ params.get("couponId")+"\",\"phone\":\""+ params.get("phone")+"\"}";
+    }
+
+    private String getBuyCouponBody(String phone, String couponId, String orderId, Integer status){
+        return "{\"couponId\":\""+couponId+"\",\"phone\":\""+phone+"\",\"orderId\":\""+orderId+"\",\"status\":"+status+"}";
     }
 
     public static void main(String[] args) throws JsonProcessingException {

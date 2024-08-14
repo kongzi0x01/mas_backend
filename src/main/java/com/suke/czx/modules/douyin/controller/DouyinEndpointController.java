@@ -2,7 +2,7 @@ package com.suke.czx.modules.douyin.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.suke.czx.common.annotation.AuthIgnore;
-import com.suke.czx.modules.douyin.service.DouyinLoginService;
+import com.suke.czx.modules.douyin.service.DouyinEndpointService;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
@@ -39,7 +39,7 @@ import java.util.*;
 public class DouyinEndpointController {
 
     @Autowired
-    private DouyinLoginService douyinLoginService;
+    private DouyinEndpointService douyinLoginService;
 
     @Autowired
     private MasItemService masItemService;
@@ -229,10 +229,20 @@ public class DouyinEndpointController {
     @AuthIgnore
     public Map<String, Object> callback(@RequestBody(required = false) Map<String, Object> params) {
         log.info("params:{}", params);
+        douyinLoginService.purchase_callback(params);
         Map<String, Object> result = new HashMap<>();
         result.put("err_no", 0);
         result.put("err_tips", "success");
         return result;
+    }
+
+    @ApiOperation(value = "订单详情")
+    @PostMapping("/order_detail")
+    @AuthIgnore
+    public R order_detail(@RequestParam String orderNo){
+
+        MasOrder result = douyinLoginService.orderDetail(orderNo);
+        return R.ok().setData(result);
     }
 
     @ApiOperation(value = "解密手机号数据")

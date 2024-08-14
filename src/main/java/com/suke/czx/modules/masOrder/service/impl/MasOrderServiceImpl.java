@@ -22,4 +22,9 @@ public class MasOrderServiceImpl extends ServiceImpl<MasOrderMapper, MasOrder> i
     public MasOrder getByOrderNo(String orderNo) {
         return baseMapper.getByOrderNo(orderNo);
     }
+
+    @Override
+    public List<MasOrder> queryByStatusAndNotifyStatus(Integer status, Integer notifyStatus){
+        return baseMapper.queryByStatusAndNotifyStatus(status, notifyStatus);
+    }
 }
