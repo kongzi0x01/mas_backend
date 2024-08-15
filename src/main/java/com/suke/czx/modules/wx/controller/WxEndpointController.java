@@ -1,14 +1,12 @@
-package com.suke.czx.modules.douyin.controller;
+package com.suke.czx.modules.wx.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.suke.czx.common.annotation.AuthIgnore;
-import com.suke.czx.modules.douyin.service.WxEndpointService;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
-import com.suke.czx.modules.masUser.entity.MasUser;
-import com.suke.czx.modules.masUser.service.MasUserService;
+import com.suke.czx.modules.wx.service.WxEndpointService;
 import com.suke.zhjg.common.autofull.util.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,9 +28,6 @@ public class WxEndpointController {
 
     @Autowired
     private MasItemService masItemService;
-
-    @Autowired
-    private MasUserService masUserService;
 
     @Autowired
     private MasOrderService masOrderService;

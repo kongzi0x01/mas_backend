@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.suke.czx.modules.masItem.entity.MasItem;
-import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.zhjg.common.autofull.annotation.AutoFullBeanSQL;
-import com.suke.zhjg.common.autofull.annotation.AutoFullFieldSQL;
 import lombok.Data;
 
 import java.io.Serializable;

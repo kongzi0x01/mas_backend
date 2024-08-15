@@ -12,6 +12,7 @@ import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
 import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.czx.modules.masUser.service.MasUserService;
+import com.suke.czx.modules.wx.service.WxEndpointService;
 
 import lombok.extern.slf4j.Slf4j;
 

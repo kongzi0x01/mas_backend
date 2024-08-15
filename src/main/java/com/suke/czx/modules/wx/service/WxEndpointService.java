@@ -1,14 +1,12 @@
-package com.suke.czx.modules.douyin.service;
+package com.suke.czx.modules.wx.service;
 
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.HttpRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
-import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.czx.modules.masUser.service.MasUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +18,6 @@ import java.util.*;
 @Slf4j
 @Service
 public class WxEndpointService {
-
-    @Autowired
-    private MasItemService masItemService;
-
-    @Autowired
-    private MasUserService masUserService;
 
     @Autowired
     private MasOrderService masOrderService;

@@ -81,7 +81,7 @@ public class DouyinEndpointController {
         map.put("secret", secret);
         map.put("code", code);
         map.put("anonymous_code", anonymous_code);
-        Map loginResult = douyinLoginService.login(map, phone);
+        Map<String, Object> loginResult = douyinLoginService.login(map, phone);
         Integer errno = (Integer) loginResult.get("err_no");
         if (errno == 0) {
             return R.ok().setData(loginResult);

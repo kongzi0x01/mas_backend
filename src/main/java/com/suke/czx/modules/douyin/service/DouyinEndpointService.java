@@ -6,6 +6,7 @@ import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
 import com.suke.czx.modules.masUser.entity.MasUser;
 import com.suke.czx.modules.masUser.service.MasUserService;
+import com.suke.czx.modules.wx.service.WxEndpointService;
 import com.suke.zhjg.common.autofull.util.R;
 
 import cn.hutool.json.JSONObject;
@@ -51,7 +52,7 @@ public class DouyinEndpointService {
     @Value("${douyin.secret}")
     private String secret;
 
-    public Map login(Map<String, String> params, String phone) {
+    public Map<String, Object> login(Map<String, String> params, String phone) {
         log.info("login params:{}", params);
         Map<String, Object> map = douyinLogin(params);
         map.forEach((k, v) -> log.info("{}:{}", k, v));
