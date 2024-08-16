@@ -1,0 +1,28 @@
+version: '3'
+services:
+  mas:
+    build: 
+      dockerfile: Dockerfile_mas
+    volumes:
+      - /data/static/:/data/static/
+    ports:
+      - "8101:8080"
+  mas-ui:
+    build:
+      dockerfile: Dockerfile_ui
+    ports:
+      - "8100:4200"
+  redis:
+    image: redis
+  mysql:
+    container_name: mysql
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - /root/mnt/mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: mas
+      TZ: Asia/Shanghai
