@@ -63,8 +63,8 @@ public class WxEndpointController {
     @ApiOperation(value = "下架/更新")
     @PostMapping("/item_remove")
     @AuthIgnore
-    public R item_remove(@RequestParam String uuid) {
-        MasItem item = masItemService.getById(uuid);
+    public R item_remove(@RequestBody MasItem vo) {
+        MasItem item = masItemService.getById(vo.getUuid());
         if (ObjectUtil.isNull(item)) {
             return R.error(1001, "代金券不存在").setData("代金券不存在");
         } else {
@@ -80,8 +80,8 @@ public class WxEndpointController {
     @ApiOperation(value = "核销代金券")
     @PostMapping("/item_checkout")
     @AuthIgnore
-    public R item_checkout(@RequestParam String orderNo) {
-        MasOrder order = masOrderService.getByOrderNo(orderNo);
+    public R item_checkout(@RequestBody MasOrder vo) {
+        MasOrder order = masOrderService.getByOrderNo(vo.getOrderNo());
         if(ObjectUtil.isNull(order)){
             return R.error(1003, "订单不存在").setData("订单不存在");
         }
