@@ -46,8 +46,8 @@ public class MasOrder implements Serializable {
     public Integer status;
 
     @ApiModelProperty(value = "是否成功通知WX服: 0未通知,1已通知创建,2已通知成功/超时")
-    @JsonProperty(value = "nofityStatus")
-    public Integer nofityStatus;
+    @JsonProperty(value = "notifyStatus")
+    public Integer notifyStatus;
 
     @ApiModelProperty(value = "用户ID")
     @JsonProperty(value = "userId")

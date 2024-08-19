@@ -40,7 +40,7 @@ public class OrderCheckerService {
                 log.error("wx服创建订单信息失败", order.getOrderNo());
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
-                order.setNofityStatus(1);
+                order.setNotifyStatus(1);
                 toUpdateOrders.add(order);
             }
         }
@@ -52,7 +52,7 @@ public class OrderCheckerService {
                 log.error("wx服创建订单信息失败", order.getOrderNo());
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
-                order.setNofityStatus(1);
+                order.setNotifyStatus(1);
                 toUpdateOrders.add(order);
             }
         }
@@ -64,7 +64,7 @@ public class OrderCheckerService {
                 log.error("wx服创建订单信息失败", order.getOrderNo());
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
-                order.setNofityStatus(1);
+                order.setNotifyStatus(1);
                 toUpdateOrders.add(order);
             }
         }
@@ -78,7 +78,7 @@ public class OrderCheckerService {
                 log.error("wx服更新订单信息失败", order.getOrderNo());
             }else{
                 log.info("wx服更新订单信息成功", order.getOrderNo());
-                order.setNofityStatus(2);
+                order.setNotifyStatus(2);
                 toUpdateOrders.add(order);
             }
         }
@@ -90,7 +90,7 @@ public class OrderCheckerService {
                 log.error("wx服更新订单信息失败", order.getOrderNo());
             }else{
                 log.info("wx服更新订单信息成功", order.getOrderNo());
-                order.setNofityStatus(2);
+                order.setNotifyStatus(2);
                 toUpdateOrders.add(order);
             }
         }

@@ -108,15 +108,14 @@ public class DouyinEndpointService {
     }
 
     public R pre_purchase(MasUser user, MasItem item) {
-        // FIXME String result = wxEndpointService.checkCoupon(user.getPhone(),
-        // item.getUuid());
-        String result = "success";
+        String result = wxEndpointService.checkCoupon(user.getPhone(), item.getUuid());
+        // String result = "success";
         if ("success".equals(result)) {
             MasOrder order = new MasOrder();
             order.setItemId(item.getUuid());
             order.setUserId(user.getId());
             order.setStatus(2);
-            order.setNofityStatus(0);
+            order.setNotifyStatus(0);
             String orderNo = "DK-" + UUID.randomUUID();
             order.setOrderNo(orderNo);
             masOrderService.save(order);
@@ -135,10 +134,10 @@ public class DouyinEndpointService {
             return R.error(1005, "请先绑定手机号").setData("请先绑定手机号");
         }
 
-        // FIXME 
-        // String result = wxEndpointService.checkCoupon(user.getPhone(), item.getUuid());
 
-        String result = "success";
+        String result = wxEndpointService.checkCoupon(user.getPhone(), order.getItemId());
+
+        // String result = "success";
         if (!"success".equals(result)) {
             return R.error(result).setData(result);
         }
@@ -217,7 +216,7 @@ public class DouyinEndpointService {
             if(!"success".equals(result)){
                 log.error("wx服更新订单信息失败", result);
             }else{
-                order.setNofityStatus(2);
+                order.setNotifyStatus(2);
             }
 
             order.setStatus(3);
@@ -236,7 +235,7 @@ public class DouyinEndpointService {
         if(!"success".equals(result)){
             log.error("wx服更新订单信息失败", result);
         }else{
-            order.setNofityStatus(2);
+            order.setNotifyStatus(2);
         }
         masOrderService.updateById(order);
     }
