@@ -118,6 +118,7 @@ public class DouyinEndpointService {
             order.setNotifyStatus(0);
             String orderNo = "DK-" + UUID.randomUUID();
             order.setOrderNo(orderNo);
+            order.setCreateTime(new Date());
             masOrderService.save(order);
             return R.ok().setData(order);
         } else {
@@ -143,7 +144,9 @@ public class DouyinEndpointService {
         }
         // 订单创建时间距今是否超过15分钟
         if (new Date().getTime() - order.getCreateTime().getTime() > 15 * 60 * 1000) {
-            return R.error(1006, "订单已过期").setData("订单已过期");
+            order.setStatus(3);
+            masOrderService.updateById(order);
+            return R.error(1006, "订单已超时").setData("订单已超时");
         }
 
         Object response = douyinCreateOrder(order);

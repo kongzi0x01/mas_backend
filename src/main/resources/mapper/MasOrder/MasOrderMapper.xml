@@ -14,4 +14,10 @@
         mas_order
         where status = #{status} and notify_status= #{notifyStatus}
     </select>
+    <select id="queryByDupplicateOrder" resultType="com.suke.czx.modules.masOrder.entity.MasOrder">
+        SELECT *
+        FROM
+        mas_order
+        where user_id = #{userId} and item_id= #{itemId} and status=2
+    </select>
 </mapper>

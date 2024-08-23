@@ -1,5 +1,6 @@
 package com.suke.czx.modules.douyin.service;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,6 +39,11 @@ public class OrderCheckerService {
             String result = wxEndpointService.buyCoupon(user.getPhone(), order.getItemId(), order.getOrderNo(), 0);
             if(!"success".equals(result)){
                 log.error("wx服创建订单信息失败", order.getOrderNo());
+                if(result.contains("该订单已推送过")){
+                    order.setNotifyStatus(1);
+                    toUpdateOrders.add(order);
+                    log.info("更新订单状态", order.getOrderNo());
+                }
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
                 order.setNotifyStatus(1);
@@ -50,6 +56,11 @@ public class OrderCheckerService {
             String result = wxEndpointService.buyCoupon(user.getPhone(), order.getItemId(), order.getOrderNo(), 0);
             if(!"success".equals(result)){
                 log.error("wx服创建订单信息失败", order.getOrderNo());
+                if(result.contains("该订单已推送过")){
+                    order.setNotifyStatus(1);
+                    toUpdateOrders.add(order);
+                    log.info("更新订单状态", order.getOrderNo());
+                }
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
                 order.setNotifyStatus(1);
@@ -62,6 +73,11 @@ public class OrderCheckerService {
             String result = wxEndpointService.buyCoupon(user.getPhone(), order.getItemId(), order.getOrderNo(), 0);
             if(!"success".equals(result)){
                 log.error("wx服创建订单信息失败", order.getOrderNo());
+                if(result.contains("该订单已推送过")){
+                    order.setNotifyStatus(1);
+                    toUpdateOrders.add(order);
+                    log.info("更新订单状态", order.getOrderNo());
+                }
             }else{
                 log.info("wx服创建订单信息成功", order.getOrderNo());
                 order.setNotifyStatus(1);
@@ -70,6 +86,20 @@ public class OrderCheckerService {
         }
         masOrderService.updateBatchById(toUpdateOrders);
         toUpdateOrders.clear();
+
+        //检查超时订单
+        orders = masOrderService.queryByStatusAndNotifyStatus(2, 1);
+        Date current = new Date();
+        for (MasOrder order : orders) {
+             // 订单创建时间距今是否超过15分钟
+             if (current.getTime() - order.getCreateTime().getTime() > 15 * 60 * 1000) {
+                order.setStatus(3);
+                toUpdateOrders.add(order);
+             }
+        }
+        masOrderService.updateBatchById(toUpdateOrders);
+        toUpdateOrders.clear();
+
         orders = masOrderService.queryByStatusAndNotifyStatus(1, 1);
         for (MasOrder order : orders) {
             MasUser user = masUserService.getById(order.getUserId());
@@ -95,6 +125,7 @@ public class OrderCheckerService {
             }
         }
         masOrderService.updateBatchById(toUpdateOrders);
+
         log.info("===== 检查订单状态 ===== END ");
     }
 }

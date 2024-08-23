@@ -139,6 +139,28 @@ public class DouyinEndpointController {
     @PostMapping("/pre_purchase")
     @AuthIgnore
     public R pre_purchase(@RequestParam String openId, @RequestParam String uuid) {
+        
+
+        MasUser user = masUserService.findUserByOpenId(openId);
+        if (user == null) {
+            return R.error(1004, "用户不存在").setData("用户不存在");
+        }
+        if (Strings.isBlank(user.getPhone())) {
+            return R.error(1005, "请先绑定手机号").setData("请先绑定手机号");
+        }
+
+        List<MasOrder> orders = masOrderService.queryByDupplicateOrder(uuid, user.getId());
+        if(!orders.isEmpty()){
+            MasOrder order = orders.get(0);
+            // 订单创建时间距今是否超过15分钟
+            if (new Date().getTime() - order.getCreateTime().getTime() > 15 * 60 * 1000) {
+                order.setStatus(3);
+                masOrderService.updateById(order);
+            }else{
+                return R.ok().setData(orders.get(0));
+            }
+        }
+
         MasItem item = masItemService.getById(uuid);
         if (ObjectUtil.isNull(item)) {
             return R.error(1001, "代金券不存在").setData("代金券不存在");
@@ -148,14 +170,6 @@ public class DouyinEndpointController {
         }
         if (!item.getOnSale()) {
             return R.error(1003, "代金券已下架").setData("代金券已下架");
-        }
-
-        MasUser user = masUserService.findUserByOpenId(openId);
-        if (user == null) {
-            return R.error(1004, "用户不存在").setData("用户不存在");
-        }
-        if (Strings.isBlank(user.getPhone())) {
-            return R.error(1005, "请先绑定手机号").setData("请先绑定手机号");
         }
 
         return douyinLoginService.pre_purchase(user, item);

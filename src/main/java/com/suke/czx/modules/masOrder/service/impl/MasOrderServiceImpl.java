@@ -27,4 +27,9 @@ public class MasOrderServiceImpl extends ServiceImpl<MasOrderMapper, MasOrder> i
     public List<MasOrder> queryByStatusAndNotifyStatus(Integer status, Integer notifyStatus){
         return baseMapper.queryByStatusAndNotifyStatus(status, notifyStatus);
     }
+
+    @Override
+    public List<MasOrder> queryByDupplicateOrder(String itemId, Long userId){
+        return baseMapper.queryByDupplicateOrder(itemId, userId);
+    }
 }

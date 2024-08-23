@@ -64,7 +64,7 @@ public class MasItem implements Serializable {
     @JsonProperty(value = "sortIndex")
     public Long sortIndex;
 
-    @ApiModelProperty(value = "类型：1, 零担; 2整车")
+    @ApiModelProperty(value = "类型：0,全部; 1, 零担; 2, 整车")
     @JsonProperty(value = "type")
     public Integer type;
 
