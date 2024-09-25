@@ -4,12 +4,11 @@ import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.HttpRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.suke.czx.modules.masItem.service.MasItemService;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
 import com.suke.czx.modules.masOrder.service.MasOrderService;
-import com.suke.czx.modules.masUser.service.MasUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,6 +20,25 @@ public class WxEndpointService {
 
     @Autowired
     private MasOrderService masOrderService;
+
+    @Value("${wx.url.verifyOrLogin}")
+    private String verifyOrLoginUrl = "https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin";
+
+    @Value("${wx.url.checkCoupon}")
+    private String checkCouponUrl = "https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon";
+
+    @Value("${wx.url.buyCoupon}")
+    private String buyCouponUrl = "https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/buyCoupon";
+    
+    @Value("${wx.url.getAdvByPosition}")
+    private String getAdvByPositionUrl = "https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/getAdvByPosition";
+
+    @Value("${wx.appkey}")
+    String appkey = "d92fb2cc9436f22b";
+
+    @Value("${wx.apipassword}")
+    String apipassword = "78b13253001ca367";
+
 
     @Autowired
     RestTemplate rest;
@@ -38,7 +56,7 @@ public class WxEndpointService {
         params.put("type", "2");
         params.put("verifyCode", "111111");
         String body = getVerifyOrLoginBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
+        Map result = httpPost(verifyOrLoginUrl, body);
         if(result == null){
             return "获取验证码失败";
         }
@@ -55,7 +73,7 @@ public class WxEndpointService {
         params.put("type", "1");
         params.put("verifyCode", smsCode);
         String body = getVerifyOrLoginBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
+        Map result = httpPost(verifyOrLoginUrl,body);
         if(result == null){
             return "登录失败";
         }
@@ -72,7 +90,7 @@ public class WxEndpointService {
         params.put("type", "3");
         params.put("verifyCode", "111111");
         String body = getVerifyOrLoginBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin",body);
+        Map result = httpPost(verifyOrLoginUrl,body);
         if(result == null){
             return "登录失败";
         }
@@ -88,7 +106,7 @@ public class WxEndpointService {
         params.put("phone", phone);
         params.put("couponId", couponId);
         String body = getCheckCouponBody(params);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon", body);
+        Map result = httpPost(checkCouponUrl, body);
         if(result == null){
             return "校验失败";
         }
@@ -103,7 +121,7 @@ public class WxEndpointService {
     // status:  0待支付，1已支付，2超时
     public String buyCoupon(String phone, String couponId, String orderId, Integer status){
         String body = getBuyCouponBody(phone, couponId, orderId, status);
-        Map result = httpPost("https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/buyCoupon", body);
+        Map result = httpPost(buyCouponUrl, body);
         if(result == null){
             return "校验失败";
         }
@@ -114,10 +132,30 @@ public class WxEndpointService {
         else return message;
     }
 
+    public List<String> getBannerUrls(){
+        String body = getBannerUrlBody();
+        Map result = httpPost(getAdvByPositionUrl, body);
+        if(result == null){
+            return new LinkedList<>();
+        }
+        Integer code = (Integer) result.get("code");
+        Boolean success = (Boolean) result.get("success");
+        List<String> urls = new LinkedList<>();
+        if(code == 200 && success){
+            Map<String, Object> data = (Map<String, Object>)result.get("result");
+            List<Map<String, String>> objects = (List<Map<String, String>>)data.get("advertisImageVOList");
+            objects.forEach(o->{
+                urls.add(o.get("advImageUrl"));
+            });
+        }
+        return urls;
+    }
+
     private Map httpPost(String url, String body) {
         Map<String, String> headers = getHeaders(body);
         String result = HttpRequest.post(url).addHeaders(headers).body(body).execute().body();
-        log.info("login response:{}", result);
+        log.info("url: {}", url);
+        log.info("response:{}", result);
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map<String, Object> map = mapper.readValue(result, Map.class);
@@ -128,9 +166,7 @@ public class WxEndpointService {
     }
 
     private Map<String, String> getHeaders(String body) {
-        String appkey = "d92fb2cc9436f22b";
         String timestamp = Long.toString(System.currentTimeMillis());
-        String apipassword = "78b13253001ca367";
         String sign = getSign(appkey, timestamp,body, apipassword);
         Map<String, String> headers = new HashMap<>();
         headers.put("X-Gateway-Apikey", appkey);
@@ -156,6 +192,10 @@ public class WxEndpointService {
 
     private String getBuyCouponBody(String phone, String couponId, String orderId, Integer status){
         return "{\"couponId\":\""+couponId+"\",\"phone\":\""+phone+"\",\"orderId\":\""+orderId+"\",\"status\":"+status+"}";
+    }
+
+    private String getBannerUrlBody(){
+        return "{\"status\":1}";
     }
 
     public static void main(String[] args) throws JsonProcessingException {

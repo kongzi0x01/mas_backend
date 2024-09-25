@@ -1,4 +1,4 @@
 from openjdk:17
 COPY mas.jar mas.jar
 EXPOSE 8080
-CMD java -Dwxserver.url=fale.url -DstaticResourcePath=/data/static/ --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dspring.redis.host=redis -Dspring.datasource.url=jdbc:mysql://mysql:3306/mas?characterEncoding=utf8\&zeroDateTimeBehavior=convertToNull\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=GMT%2B8\&nullCatalogMeansCurrent=true\&allowPublicKeyRetrieval=true -jar mas.jar
+CMD java -Dspring.profiles.active=pro --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -jar mas.jar

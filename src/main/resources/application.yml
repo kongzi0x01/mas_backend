@@ -66,3 +66,12 @@ staticResourcePath: C:/static/
 douyin:
   appid: tt09537fee9664a91601
   secret: 52009ecc4abf90dc1e1ef48633dc2ba2fc82471a
+
+wx:
+  appkey: d92fb2cc9436f22b
+  apipassword: 78b13253001ca367
+  url:
+    verifyOrLogin: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin
+    checkCoupon: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon
+    buyCoupon: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/buyCoupon
+    getAdvByPosition: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/getAdvByPosition

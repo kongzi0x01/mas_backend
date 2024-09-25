@@ -26,6 +26,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author admin
@@ -138,8 +139,21 @@ public class DouyinEndpointController {
     @ApiOperation(value = "下单前校验")
     @PostMapping("/pre_purchase")
     @AuthIgnore
-    public R pre_purchase(@RequestParam String openId, @RequestParam String uuid) {
+    public R pre_purchase(@RequestParam String openId, @RequestParam String uuid, @RequestParam(defaultValue = "") String orderNo) {
         
+        if(!Strings.isBlank(orderNo)){
+            MasOrder order = masOrderService.getByOrderNo(orderNo);
+            if(order == null){
+                return R.error(1006, "订单不存在").setData("订单不存在");
+            }
+            if (new Date().getTime() - order.getCreateTime().getTime() > 15 * 60 * 1000) {
+                order.setStatus(3);
+                masOrderService.updateById(order);
+                return R.error(1007, "订单已超时").setData("订单已超时");
+            }else{
+                return R.ok().setData(order);
+            }
+        }
 
         MasUser user = masUserService.findUserByOpenId(openId);
         if (user == null) {
@@ -194,6 +208,7 @@ public class DouyinEndpointController {
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", user.getId());
         List<MasOrder> orders = masOrderService.listByMap(params);
+        orders = orders.stream().filter(order->order.getStatus()!=3).collect(Collectors.toList());
         orders.forEach(masOrder -> masOrder.setItem(masItemService.getById(masOrder.getItemId())));
         return R.ok().setData(orders);
     }
@@ -287,5 +302,13 @@ public class DouyinEndpointController {
     @AuthIgnore
     public R fetchSmsCode(@RequestParam String phone) {
         return douyinLoginService.fetchSmsCode(phone);
+    }
+
+    @ApiOperation(value = "获取banner图列表")
+    @PostMapping("/getBannerUrls")
+    @AuthIgnore
+    public R getBannerUrls() {
+        List<String> urls = douyinLoginService.getBannerUrls();
+            return R.ok().setData(urls);
     }
 }

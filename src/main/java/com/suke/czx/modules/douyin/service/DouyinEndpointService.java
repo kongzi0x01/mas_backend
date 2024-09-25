@@ -162,7 +162,7 @@ public class DouyinEndpointService {
             if(!"success".equals(wxresult)){
                 log.error("wx服创建订单信息失败", result);
             }else{
-                order.setStatus(1);
+                order.setNotifyStatus(1);
             }
             masOrderService.updateById(order);
             return R.ok().setData(map);
@@ -230,9 +230,9 @@ public class DouyinEndpointService {
         MasItem item = masItemService.getById(order.getItemId());
         order.setPuchasedNo(payment_order_no);
         order.setStatus(1);
-        order.setPuchasedTime(new Date(paid_at));
+        order.setPuchasedTime(new Date(paid_at*1000));
         order.setUpdateTime(new Date());
-        order.setExpireTime(new Date(paid_at + item.getValidDays()*24*60*60));
+        order.setExpireTime(new Date((paid_at + item.getValidDays()*24*60*60)*1000));
         order.setPuchasedAmount(total_amount);
         String result = wxEndpointService.buyCoupon(user.getPhone(), order.getItemId(), order.getOrderNo(), 1);
         if(!"success".equals(result)){
@@ -247,5 +247,9 @@ public class DouyinEndpointService {
         MasOrder order = masOrderService.getByOrderNo(orderNo);
         order.setItem(masItemService.getById(order.getItemId()));
         return order;
+    }
+
+    public List<String> getBannerUrls(){
+        return wxEndpointService.getBannerUrls();
     }
 }

@@ -4,4 +4,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/mas?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/mas?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+  redis:
+    host: redis
+    port: 6379
+    password:
+wx:
+  appkey: d92fb2cc9436f22b
+  apipassword: 78b13253001ca367
+  url:
+    verifyOrLogin: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/verifyOrLogin
+    checkCoupon: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/checkCoupon
+    buyCoupon: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/buyCoupon
+    getAdvByPosition: https://openapi.dekuncn.com/gateway/dekun-plus-third/uat/dekun-boot/toktik/getAdvByPosition
+
+staticResourcePath: /data/static/
