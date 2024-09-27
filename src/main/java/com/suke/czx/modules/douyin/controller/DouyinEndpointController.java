@@ -311,4 +311,13 @@ public class DouyinEndpointController {
         List<String> urls = douyinLoginService.getBannerUrls();
             return R.ok().setData(urls);
     }
+
+    @ApiOperation(value = "推送抖音订单")
+    @PostMapping("/douyinPushOrder")
+    @AuthIgnore
+    public R douyinPushOrder(@RequestParam String orderNo) {
+        MasOrder order = masOrderService.getByOrderNo(orderNo);
+        Object result = douyinLoginService.douyinPushOrder(order);
+        return R.ok().setData(result);
+    }
 }

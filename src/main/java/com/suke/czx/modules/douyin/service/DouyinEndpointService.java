@@ -1,5 +1,7 @@
 package com.suke.czx.modules.douyin.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suke.czx.modules.masItem.entity.MasItem;
 import com.suke.czx.modules.masItem.service.MasItemService;
 import com.suke.czx.modules.masOrder.entity.MasOrder;
@@ -165,6 +167,7 @@ public class DouyinEndpointService {
                 order.setNotifyStatus(1);
             }
             masOrderService.updateById(order);
+            douyinPushOrder(order);
             return R.ok().setData(map);
         } else {
             return R.error().setData(map);
@@ -190,6 +193,102 @@ public class DouyinEndpointService {
         HttpEntity httpEntity = new HttpEntity<>(params, headers);
         Object response = rest.postForObject(url, httpEntity, Object.class);
         return response;
+    }
+
+    public Object douyinPushOrder(MasOrder order){
+        String url = "https://developer.toutiao.com/api/apps/order/v2/push";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        Map<String, Object> params = new HashMap<>();
+        String accessToken = getAccessToken();
+        MasUser user = masUserService.getById(order.getUserId());
+        Long updateTime = System.currentTimeMillis()/1000;
+        String orderDetail = getOrderDetail(order);
+        params.put("access_token", accessToken);
+        params.put("app_name", "douyin");
+        params.put("open_id", user.getOpenid());
+        params.put("order_detail", orderDetail);
+        params.put("order_type", 0);
+        params.put("update_time", updateTime);
+
+        HttpEntity httpEntity = new HttpEntity<>(params, headers);
+        Object response = rest.postForObject(url, httpEntity, Object.class);
+        log.info("douyinPushOrder result:{}", response);
+        return response;
+    }
+
+    private String getAccessToken(){
+        String accessToken = (String) redisTemplate.opsForValue().get("access_token");
+        if(Strings.isBlank(accessToken)){
+            accessToken = getDouyinAccessToken();
+            redisTemplate.opsForValue().set("access_token", accessToken, 100, TimeUnit.MINUTES);
+        }
+        log.info("accessToken: {}", accessToken);
+        return accessToken;
+    }
+
+    private String getOrderDetail(MasOrder order){
+        MasItem item = masItemService.getById(order.getItemId());
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> subItem = new HashMap<>();
+        Integer price = item.getPrice().multiply(new BigDecimal(100)).intValue();
+        subItem.put("item_code", item.getUuid());
+        subItem.put("img", item.getIndexUrl());
+        subItem.put("title", item.getName());
+        subItem.put("amount", 1);
+        subItem.put("price", price);
+        map.put("order_id", order.getOrderNo());
+        map.put("create_time", order.getCreateTime().getTime());
+        map.put("status", getOrderDetailStatusDesc(order)); // 待支付,已支付,已取消,已超时,已核销,退款中,已退款,退款失败
+        map.put("amount", 1);
+        map.put("total_price", price);
+        map.put("detail_url", item.getIndexUrl());
+        map.put("item_list", Collections.singleton(subItem));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String str = null;
+        try {
+            str = objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        log.info(str);
+        return str;
+    }
+
+    private String getOrderDetailStatusDesc(MasOrder order){
+        // 1已支付,2待支付,3超时, 4已核销, 5已过期
+        if(order.getStatus() == 1){
+            return "已支付";
+        }else if(order.getStatus() == 2){
+            return "待支付";
+        }else if(order.getStatus() == 3){
+            return "已超时";
+        }else if(order.getStatus() == 4){
+            return "已核销";
+        }else if(order.getStatus() == 5){
+            return "已取消";
+        }else{
+            return "已取消";
+        }
+    }
+
+    private String getDouyinAccessToken(){
+        String url = "https://developer.toutiao.com/api/apps/v2/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        Map<String, String> params = new HashMap<>();
+        params.put("appid", appid);
+        params.put("secret", secret);
+        params.put("grant_type", "client_credential");
+        HttpEntity httpEntity = new HttpEntity<>(params, headers);
+        Object response = rest.postForObject(url, httpEntity, Object.class);
+        log.info("getDouyinAccessToken result:{}", response);
+        Map<String, Object> map = (Map<String, Object>) response;
+        Map<String, String> data = (Map<String, String>) map.get("data");
+        return data.get("access_token");
     }
 
     public void purchase_callback(Map<String, Object> params){
@@ -224,6 +323,7 @@ public class DouyinEndpointService {
 
             order.setStatus(3);
             masOrderService.updateById(order);
+            douyinPushOrder(order);
             log.info("订单超时");
             return;
         }
@@ -241,6 +341,7 @@ public class DouyinEndpointService {
             order.setNotifyStatus(2);
         }
         masOrderService.updateById(order);
+        douyinPushOrder(order);
     }
 
     public MasOrder orderDetail(String orderNo){
